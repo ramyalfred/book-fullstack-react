@@ -1,19 +1,13 @@
 
 class ProductList extends React.Component {
 
-
-  constructor(props){
-    super(props);
-
-    this.state={
-      productList: window.Seed.products,
+    state={
+      productList: [],
     };
 
-    this.handleProductUpVote = this.handleProductUpVote.bind(this);
-    
-  }
 
   render() {
+    
 
     return (
       <div className='ui unstackable items'>
@@ -26,28 +20,31 @@ class ProductList extends React.Component {
     );
   }
 
-  handleProductUpVote(id){
+  //Best practive to Seed the data in componentDidMount and initialize it empty
+  componentDidMount(){
+    this.setState({
+      productList: window.Seed.products,
+    });
+  }
+
+  handleProductUpVote = (id) => {
     console.log(id);
 
-    window.Seed.products.forEach((product) => {
-      if (product.id === id) {
-        product.votes = product.votes + 1;
+    const updatedProductList = this.state.productList.map((product) => {
+      if(product.id === id){
+        return Object.assign({},product,{
+          votes:product.votes + 1,
+        });
+      } else{
+        return product;
       }
     });
 
-    this.setState({
-      productList: window.Seed.products
-    });
+    this.setState({productList: updatedProductList});
   }
 }
 
 class Product extends React.Component {
-
-  constructor(props){
-    super(props);
-
-    this.handleUpVote = this.handleUpVote.bind(this);
-  }
 
   render() {
     
@@ -88,7 +85,7 @@ class Product extends React.Component {
     );
   }
 
-  handleUpVote(){
+  handleUpVote = () => {
     this.props.onVote(this.props.id);
   }
 }
