@@ -1,5 +1,11 @@
 class TimerDashboard extends React.Component {
 
+  constructor(props){
+    super(props);
+
+    this.onFormSubmit = this.onFormSubmit.bind(this);
+  }
+
     state = {
         timers: [
           {
@@ -19,6 +25,26 @@ class TimerDashboard extends React.Component {
         ],
     };
 
+    onFormSubmit = (form) => {
+      if(form.id){ //Existing timer
+        console.log("Existing form");
+      }else{ //New timer
+        //Create a new timer
+        const newTimer = {
+          id: uuid.v4(),
+          title: form.title,
+          project: form.project,
+          elapsed: 0,
+          runningSince: null,
+        };
+
+        //update state with the newly created timer 
+        this.setState( prevState => ({
+          timers: [...prevState.timers,newTimer]
+        }));
+      }
+    };
+
     render(){
       return(
         <div className='ui three column centered grid'>
@@ -26,7 +52,9 @@ class TimerDashboard extends React.Component {
             <EditableTimerList
               timers={this.state.timers}
             />
-            <ToggleableTimerForm />
+            <ToggleableTimerForm
+              onFormSubmit={this.onFormSubmit}
+            />
         </div>
       </div>
       );
@@ -88,6 +116,7 @@ class TimerForm extends React.Component{
 
     this.handleTitleChange = this.handleTitleChange.bind(this);
     this.handleProjectChange = this.handleProjectChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   state={
@@ -103,8 +132,16 @@ class TimerForm extends React.Component{
     this.setState({project: event.target.value});
   }
 
+  handleSubmit = () => {
+    this.props.onFormSubmit({
+      id: this.props.id,
+      title: this.state.title,
+      project: this.state.project,
+    })
+  };
+
   render(){
-    const submitText = this.props.title ? 'Update' : 'Create';
+    const submitText = this.props.id ? 'Update' : 'Create';
     return(
       <div className='ui centered card'>
         <div className='content'>
@@ -118,10 +155,10 @@ class TimerForm extends React.Component{
               <input type='text' value={this.props.project} onChange={this.handleProjectChange} />
             </div>
             <div className='ui two bottom attached buttons'>
-              <button onClick={this.props.handleSubmit} className='ui basic blue button'>
+              <button onClick={this.handleSubmit} className='ui basic blue button'>
                 {submitText}
               </button>
-              <button className='ui basic red button'>
+              <button onClick={this.props.onFormClose} className='ui basic red button'>
                 Cancel
               </button>
             </div>
@@ -139,6 +176,7 @@ class ToggleableTimerForm extends React.Component{
     super(props);
 
     this.handleFormOpen = this.handleFormOpen.bind(this);
+    this.handleFormClose = this.handleFormClose.bind(this);
   }
 
   state={
@@ -149,10 +187,17 @@ class ToggleableTimerForm extends React.Component{
     this.setState({isOpen: true});
   };
 
+  handleFormClose = () => {
+    this.setState({isOpen: false});
+  };
+
     render(){
         if(this.state.isOpen){
             return(
-                <TimerForm />
+                <TimerForm 
+                  onFormClose={this.handleFormClose}
+                  onFormSubmit={this.props.onFormSubmit}
+                />
             );
         }else{
           return(
