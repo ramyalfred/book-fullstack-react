@@ -3,7 +3,8 @@ class TimerDashboard extends React.Component {
   constructor(props){
     super(props);
 
-    this.onFormSubmit = this.onFormSubmit.bind(this);
+    this.handleCreateFormSubmit = this.handleCreateFormSubmit.bind(this);
+    this.createTimer = this.createTimer.bind(this);
   }
 
     state = {
@@ -25,24 +26,18 @@ class TimerDashboard extends React.Component {
         ],
     };
 
-    onFormSubmit = (form) => {
-      if(form.id){ //Existing timer
-        console.log("Existing form");
-      }else{ //New timer
-        //Create a new timer
-        const newTimer = {
-          id: uuid.v4(),
-          title: form.title,
-          project: form.project,
-          elapsed: 0,
-          runningSince: null,
-        };
+   
 
-        //update state with the newly created timer 
-        this.setState( prevState => ({
-          timers: [...prevState.timers,newTimer]
-        }));
-      }
+    handleCreateFormSubmit = (timer) => {
+      this.createTimer(timer);
+    };
+
+    //Single responsibility principle enables us to use createTimer in other places
+    createTimer = (timer) => {
+      const t = helpers.newTimer(timer);
+      this.setState({
+        timers: this.state.timers.concat(t),
+      })
     };
 
     render(){
@@ -53,7 +48,7 @@ class TimerDashboard extends React.Component {
               timers={this.state.timers}
             />
             <ToggleableTimerForm
-              onFormSubmit={this.onFormSubmit}
+              onFormSubmit={this.handleCreateFormSubmit}
             />
         </div>
       </div>
@@ -177,6 +172,7 @@ class ToggleableTimerForm extends React.Component{
 
     this.handleFormOpen = this.handleFormOpen.bind(this);
     this.handleFormClose = this.handleFormClose.bind(this);
+    this.handleFormSubmit = this.handleFormSubmit.bind(this);
   }
 
   state={
@@ -191,12 +187,18 @@ class ToggleableTimerForm extends React.Component{
     this.setState({isOpen: false});
   };
 
+  //Toggling the isOpen to off incase of Async operations to create timer
+  handleFormSubmit = (timer) => {
+    this.setState({isOpen: false});
+    this.props.onFormSubmit(timer);
+  };
+
     render(){
         if(this.state.isOpen){
             return(
                 <TimerForm 
                   onFormClose={this.handleFormClose}
-                  onFormSubmit={this.props.onFormSubmit}
+                  onFormSubmit={this.handleFormSubmit}
                 />
             );
         }else{
