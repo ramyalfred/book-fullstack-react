@@ -105,6 +105,11 @@ class EditableTimer extends React.Component{
     this.setState({editFormOpen: true});
   }
 
+  handleFormClose = () => {
+    console.log("Form Cancelled");
+    this.setState({editFormOpen: false});
+  }
+
   render(){
     if(this.state.editFormOpen){
       return(
@@ -113,6 +118,7 @@ class EditableTimer extends React.Component{
           title={this.props.title}
           project={this.props.project}
           onFormSubmit={this.props.handleEditFormSubmit}
+          onFormClose={this.handleFormClose}
         />
       );
     }else{
