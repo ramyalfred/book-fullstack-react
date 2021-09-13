@@ -37,17 +37,19 @@ class TimerDashboard extends React.Component {
     };
 
     updateTimer = (attrs) => {
-      const updatedTimerList = this.state.timers.map((timer) => {
-        if(timer.id == attrs.id)
-        {
-          timer.title = attrs.title;
-          timer.project = attrs.project;
-        }
-      });
       this.setState({
-        timers: updatedTimerList,
+        timers: this.state.timers.map((timer) => {
+          if(timer.id == attrs.id){
+            return Object.assign({}, timer, {
+              title: attrs.title,
+              project: attrs.project,
+            });
+          }else{
+            return timer;
+          }
+        }),
       });
-    }
+    };
 
     //Single responsibility principle enables us to use createTimer in other places
     createTimer = (timer) => {
@@ -102,13 +104,25 @@ class EditableTimer extends React.Component{
   };
 
   handleEditClick = () => {
-    this.setState({editFormOpen: true});
+    this.openForm();
   }
 
   handleFormClose = () => {
-    console.log("Form Cancelled");
-    this.setState({editFormOpen: false});
+    this.closeForm();
   }
+
+  handleUpdateSubmit = (attrs) => {
+    this.props.handleEditFormSubmit(attrs);
+    this.closeForm();
+  }
+
+  openForm = () => {
+    this.setState({editFormOpen: true});
+  }
+
+  closeForm = () => {
+    this.setState({editFormOpen: false});
+  };
 
   render(){
     if(this.state.editFormOpen){
@@ -117,7 +131,7 @@ class EditableTimer extends React.Component{
           id={this.props.id}
           title={this.props.title}
           project={this.props.project}
-          onFormSubmit={this.props.handleEditFormSubmit}
+          onFormSubmit={this.handleUpdateSubmit}
           onFormClose={this.handleFormClose}
         />
       );
@@ -174,11 +188,11 @@ class TimerForm extends React.Component{
           <div className='ui form'>
             <div className='field'>
               <label>Title</label>
-              <input type='text' value={this.props.title} onChange={this.handleTitleChange} />
+              <input type='text' value={this.state.title} onChange={this.handleTitleChange} />
             </div>
             <div className='field'>
               <label>Project</label>
-              <input type='text' value={this.props.project} onChange={this.handleProjectChange} />
+              <input type='text' value={this.state.project} onChange={this.handleProjectChange} />
             </div>
             <div className='ui two bottom attached buttons'>
               <button onClick={this.handleSubmit} className='ui basic blue button'>
