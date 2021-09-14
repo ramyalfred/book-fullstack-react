@@ -23,7 +23,7 @@ class TimerDashboard extends React.Component {
             project: 'Kitchen Chores',
             id: uuid.v4(),
             elapsed: 1273998,
-            runningSince: null,
+            runningSince: Date.now(),
           },
         ],
     };
@@ -273,12 +273,34 @@ class ToggleableTimerForm extends React.Component{
 
 class Timer extends React.Component{
 
-  onDeleteClick = () => {
-    this.props.handleDeleteTimer({id: this.props.id});
+  state = {
+    isRunning: false,
   };
 
+  //Have force update run every 50 ms
+  componentDidMount(){
+    if(this.state.isRunning){
+      this.forceUpdateInterval = setInterval(() => this.forceUpdate(),50);
+    }
+  }
+
+  onTimerClick = () => {
+    console.log('Timer Clicked')
+    console.log(this.state.isRunning);
+    this.setState({isRunning: !this.state.isRunning});
+  };
+
+  //Reset the continous running of force update
+  componentWillUnmount(){
+    clearInterval(this.forceUpdateInterval);
+  }
+
+  onDeleteClick = () => {
+    this.props.handleDeleteTimer({id: this.props.id});
+  }
+
     render(){
-        const elapsedString = helpers.renderElapsedString(this.props.elapsed);
+        const elapsedString = helpers.renderElapsedString(this.props.elapsed, this.props.runningSince);
 
         return(
             <div className='ui centered card'>
@@ -303,12 +325,33 @@ class Timer extends React.Component{
                     </span>
                   </div>
                 </div>
-                <div className='ui bottom attached blue basic button'>
-                  Start
-                </div>
+                <TimerActionButton 
+                  isRunning={this.state.isRunning}
+                  OnButtonClick={this.onTimerClick}
+                />
             </div>
         );
     }
+}
+
+class TimerActionButton extends React.Component{
+
+render(){
+  if(this.props.isRunning){
+    return(
+      <div className='ui bottom attached red basic button' onClick={this.props.onButtonClick}>
+        Stop
+      </div>
+    );
+  }else{
+    return(
+      <div className='ui bottom attached blue basic button' onClick={this.props.OnButtonClick}>
+        Start
+      </div>
+    );
+  }
+}
+
 }
 
 ReactDOM.render(
