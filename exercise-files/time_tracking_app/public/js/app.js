@@ -45,6 +45,48 @@ class TimerDashboard extends React.Component {
       console.log(this.state.timers);
     }
 
+    handleStartClick = (id) => {
+      this.startTimer(id);
+    }
+
+    handleStopClick = (id) => {
+      this.stopTimer(id);
+    }
+
+    stopTimer = (id) => {
+      const now = Date.now();
+
+      this.setState({
+        timers: this.state.timers.map((timer) => {
+          if(timer.id == id){
+            const lastElapsed = now - timer.runningSince;
+            return Object.assign({}, timer, {
+              elapsed: lastElapsed + timer.elapsed,
+              runningSince: null,
+            });
+          }else{
+            return timer;
+          }
+        }),
+      });
+    }
+
+    startTimer = (id) => {
+      const now = Date.now();
+
+      this.setState({
+        timers: this.state.timers.map((timer) => {
+          if(timer.id == id){
+            return Object.assign({}, timer, {
+              runningSince: now
+            });
+          }else{
+            return timer;
+          }
+        }),
+      });
+    } 
+
     updateTimer = (attrs) => {
       this.setState({
         timers: this.state.timers.map((timer) => {
@@ -76,6 +118,8 @@ class TimerDashboard extends React.Component {
               timers={this.state.timers}
               handleEditFormSubmit={this.handleEditFormSubmit}
               handleDeleteTimer={this.handleDeleteTimer}
+              onStopClick={this.handleStopClick}
+              onStartClick={this.handleStartClick}
             />
             <ToggleableTimerForm
               onFormSubmit={this.handleCreateFormSubmit}
@@ -99,6 +143,8 @@ class EditableTimerList extends React.Component{
         runningSince={timer.runningSince}
         handleEditFormSubmit={this.props.handleEditFormSubmit}
         handleDeleteTimer={this.props.handleDeleteTimer}
+        onStopClick={this.props.onStopClick}
+        onStartClick={this.props.onStartClick}
       />
     ));
     return(
@@ -156,6 +202,8 @@ class EditableTimer extends React.Component{
         runningSince={this.props.runningSince}
         onEditClick={this.handleEditClick}
         handleDeleteTimer={this.props.handleDeleteTimer}
+        onStopClick={this.props.onStopClick}
+        onStartClick={this.props.onStartClick}
       />
       );
     }
@@ -279,16 +327,16 @@ class Timer extends React.Component{
 
   //Have force update run every 50 ms
   componentDidMount(){
-    if(this.state.isRunning){
-      this.forceUpdateInterval = setInterval(() => this.forceUpdate(),50);
-    }
+    this.forceUpdateInterval = setInterval(() => this.forceUpdate(),50); 
   }
 
-  onTimerClick = () => {
-    console.log('Timer Clicked')
-    console.log(this.state.isRunning);
-    this.setState({isRunning: !this.state.isRunning});
-  };
+  handleStartClick = () => {
+    this.props.onStartClick(this.props.id);
+  }
+
+  handleStopClick = () => {
+    this.props.onStopClick(this.props.id);
+  }
 
   //Reset the continous running of force update
   componentWillUnmount(){
@@ -326,8 +374,9 @@ class Timer extends React.Component{
                   </div>
                 </div>
                 <TimerActionButton 
-                  isRunning={this.state.isRunning}
-                  OnButtonClick={this.onTimerClick}
+                  isRunning={!!this.props.runningSince}
+                  onStopClick={this.handleStopClick}
+                  onStartClick={this.handleStartClick}
                 />
             </div>
         );
@@ -339,13 +388,13 @@ class TimerActionButton extends React.Component{
 render(){
   if(this.props.isRunning){
     return(
-      <div className='ui bottom attached red basic button' onClick={this.props.onButtonClick}>
+      <div className='ui bottom attached red basic button' onClick={this.props.onStopClick}>
         Stop
       </div>
     );
   }else{
     return(
-      <div className='ui bottom attached blue basic button' onClick={this.props.OnButtonClick}>
+      <div className='ui bottom attached blue basic button' onClick={this.props.onStartClick}>
         Start
       </div>
     );
