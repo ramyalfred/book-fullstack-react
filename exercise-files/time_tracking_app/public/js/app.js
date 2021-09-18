@@ -14,13 +14,11 @@ class TimerDashboard extends React.Component {
     };
 
    handleEditFormSubmit = (attrs) => {
-     this.updateTimer(attrs)
-     client.updateTimer(attrs)
+     this.updateTimer(attrs);
    }
 
     handleCreateFormSubmit = (timer) => {
       this.createTimer(timer);
-      client.createTimer(timer);
     };
 
     handleDeleteTimer = (attrs) => {
@@ -93,6 +91,8 @@ class TimerDashboard extends React.Component {
           }
         }),
       });
+      //server update
+      client.updateTimer(attrs);
     };
 
     //Single responsibility principle enables us to use createTimer in other places
@@ -101,6 +101,8 @@ class TimerDashboard extends React.Component {
       this.setState({
         timers: this.state.timers.concat(t),
       })
+      //server creation
+      client.createTimer(timer);
     };
 
     render(){
