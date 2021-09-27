@@ -1,5 +1,8 @@
 import React from 'react';
 
+//Creating a React context to hold the theme
+export const themeContext = React.createContext(themes.dark);
+
 export const themes = {
   light: {
     foreground: '#222222',
